@@ -193,8 +193,7 @@ end
 -- (0,1) = original facing, (1,0) = right, (-1,0) = left, (0,-1) = back
 function turnTo(xDirection, zDirection)
 	local turns = 0
-	print("turnTo(", xDirection, ", ", zDirection, ") @ ", xdir, ", ", zdir)
-	while((xdir ~= xDirection) and (zdir ~= zDirection)) do
+	while((xdir ~= xDirection) or (zdir ~= zDirection)) do
 		turnLeft()
 		turns = turns + 1
 		if(doDebug) then debug() end
@@ -215,12 +214,9 @@ function returnHome()
 	end
 
 	if(xpos > 0) then
-		print ("xpos > 0")
 		turnTo(-1, 0)
-		print ("turned, now move")
 		forward(xpos)
 	else
-		print ("xpos >= 0")
 		turnTo(1, 0)
 		forward(-xpos)
 	end
@@ -233,8 +229,6 @@ function returnHome()
 		forward(-zpos)
 	end
 	
-	print ("turn to origin")
-
 	turnTo(0, 1)
 end
 

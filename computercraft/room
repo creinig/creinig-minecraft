@@ -28,7 +28,7 @@ for widthTemp = 1, width do
    for heightTemp = 1, height do
    		move.forward(depth - 1)
 
-          -- line complete, move to next line
+        -- line complete, move to next line
         if heightTemp<height then
           	move.up(1)
             move.turnAround()
