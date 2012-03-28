@@ -3,7 +3,8 @@
 -- The room starts in the turtle's position and extends 
 -- forward, to the right and up
 --
--- TODO: Go back to original position once done
+-- Requires: apis/move
+--
 -- TODO: empty the inventory if full
 --
 
