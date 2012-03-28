@@ -1,6 +1,15 @@
+--
+-- Lets a turtle dig a room with the given dimensions.
+-- The room starts immediately in front of the turtle and extends 
+-- forward, to the right and up
+--
+-- TODO: Go back to original position once done
+-- TODO: empty the inventory if full
+--
+
 local tArgs = { ... }
 -- check number of arguments
-if #tArgs < 3 or #tArgs > 4 then
+if #tArgs < 3 then
     error("Usage: room <depth> <height> <width>")
 end
 
@@ -12,55 +21,8 @@ local sleepTime = 0.2
 local collected = 0
 local firstDig = true -- depth on first row is one more than for the others
 
-local function collect()
-	collected = collected + 1
-	if(math.fmod(collected, 25) == 0) then
-		print("Mined ", collected, " blocks.")
-	end
-end
-
--- dig one block forward, possible multiple times if something
--- has fallen down
-local function tryDig()
-	while turtle.dig() do
-		collect()
-		sleep(sleepTime)
-		if not turtle.detect() then
-			return true
-		end
-	end
-	
-	return not turtle.detect()
-end
-
--- dig one block upward, possible multiple times if something
--- has fallen down
-local function tryDigUp()
-	while turtle.digUp() do
-		collect()
-		sleep(sleepTime)
-		if not turtle.detectUp() then
-			return true
-		end
-	end
-	
-	return not turtle.detectUp()
-end
-
--- dig and move one block forward. Retries as long as something is in the way
-local function digForward() 
-	while not turtle.forward() do
-		tryDig()
-	end
-	--sleep(sleepTime) -- uncomment for debugging
-end
-
--- dig and move one block upward. Retries as long as something is in the way
-local function digUp() 
-	while not turtle.up() do
-		tryDigUp()
-	end
-end
+os.loadAPI("apis/move")
+move.enableDigging()
 
 
 -- create room
@@ -75,11 +37,11 @@ for widthTemp = 1, width do
     	for depthTemp = 1, depthToDig do
             print ("d ", depthTemp, "/", depth, " h ", heightTemp, "/", height)
           	-- dig straight forward
-          	digForward()
+          	move.forward()
         end
           -- line complete, move to next line
         if heightTemp<height then
-          	digUp()
+          	move.up()
             turtle.turnLeft()
             turtle.turnLeft()
         end
@@ -91,7 +53,7 @@ for widthTemp = 1, width do
           turtle.turnLeft()
           turtle.turnLeft()
           for depthTemp=1, depth-1 do
-            digForward()
+            move.forward()
           end
    end
    -- move down
@@ -101,7 +63,7 @@ for widthTemp = 1, width do
    -- next slice
    if widthTemp < width then
           turtle.turnLeft()
-          digForward()
+          move.forward()
           turtle.turnLeft()
    end
 end

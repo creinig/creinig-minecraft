@@ -1,0 +1,100 @@
+--
+-- Little API to make moving and digging with the turtle a bit easier
+--
+
+
+--
+-- State ----------------------
+--
+
+-- turtle orientation relative to starting position
+local xdir = 0
+local zdir = 1
+
+-- turtle position relative to starting point
+local xpos = 0
+local ypos = 0
+local zpos = 0
+
+-- should a movement always dig through any obstacles?
+local alwaysDig = false
+
+-- "Blocks collected" counter
+local collected = 0
+
+local function collect()
+	collected = collected + 1
+	if(math.fmod(collected, 25) == 0) then
+		print("Mined ", collected, " blocks.")
+	end
+end
+
+
+--
+-- Internals -------------------------------
+--
+
+-- dig one block forward, possible multiple times if something
+-- has fallen down
+local function tryDig()
+	while turtle.dig() do
+		collect()
+		sleep(sleepTime)
+		if not turtle.detect() then
+			return true
+		end
+	end
+	
+	return not turtle.detect()
+end
+
+-- dig one block upward, possible multiple times if something
+-- has fallen down
+local function tryDigUp()
+	while turtle.digUp() do
+		collect()
+		sleep(sleepTime)
+		if not turtle.detectUp() then
+			return true
+		end
+	end
+	
+	return not turtle.detectUp()
+end
+
+
+--
+-- API -------------------------
+--
+
+function enableDigging()
+	alwaysDig = true
+end
+
+function disableDigging()
+	alwaysDig = false
+end
+
+
+-- Move one block forward. Optionally removes anything in the way
+function forward()
+	if(alwaysDig) then
+		while not turtle.forward() do
+			tryDig()
+		end
+	else
+		turtle.forward()
+	end
+	--sleep(sleepTime) -- uncomment for debugging
+end
+
+-- dig and move one block upward. Retries as long as something is in the way
+function up() 
+	if(alwaysDig) then
+		while not turtle.up() do
+			tryDigUp()
+		end
+	else
+		turtle.up()
+	end
+end
