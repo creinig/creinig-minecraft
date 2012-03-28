@@ -1,0 +1,75 @@
+--
+-- Central control program for pulsing on a
+-- bundled wire. Allows different pulses for each
+-- color.
+--
+
+--
+-- Pulser definition
+--
+local pulsers = {
+	recycler = {color = colors.green, interval = 45},
+	piping   = {color = colors.yellow, interval = 10} --,
+--	disco    = {color = colors.red, interval = 1, duration = 0.3}
+}
+
+
+--
+-- State tracking
+--
+
+local currentPattern = 0
+
+--
+-- Functions
+--
+
+local function setColor(color, value)
+	if(value) then
+		currentPattern = colors.combine(currentPattern, color)
+	else
+		currentPattern = colors.subtract(currentPattern, color)
+	end
+	
+	redstone.setBundledOutput("back", currentPattern)
+end
+
+
+local function initialize()
+	for name, definition in pairs(pulsers) do
+		definition.age = definition.interval -- start with pulse
+		definition.state = false
+		definition.duration = definition.duration or 0.1
+		setColor(definition.color, false)
+	end
+end
+
+
+
+initialize()
+
+--
+-- Main loop
+--
+while true do
+  sleep (0.1)
+  
+  for name, definition in pairs(pulsers) do
+	definition.age = definition.age + 0.1
+	
+	local maxAge
+	if(definition.state == true) then
+		maxAge = definition.duration
+	else
+		maxAge = definition.interval
+	end
+	
+	if(definition.age >= maxAge) then
+  		definition.state = not definition.state
+  		print ("Setting " , name , " to " , definition.state)
+  		setColor(definition.color, definition.state)
+  		definition.age = 0
+  	end
+  end
+end
+
