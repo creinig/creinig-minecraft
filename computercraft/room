@@ -1,6 +1,6 @@
 --
 -- Lets a turtle dig a room with the given dimensions.
--- The room starts immediately in front of the turtle and extends 
+-- The room starts in the turtle's position and extends 
 -- forward, to the right and up
 --
 -- TODO: Go back to original position once done
@@ -17,54 +17,40 @@ depth = tonumber(tArgs[1])
 height = tonumber(tArgs[2])
 width = tonumber(tArgs[3])
 
-local sleepTime = 0.2
-local collected = 0
-local firstDig = true -- depth on first row is one more than for the others
 
 os.loadAPI("apis/move")
 move.enableDigging()
+move.setDebugging(true)
 
 
 -- create room
 for widthTemp = 1, width do
    for heightTemp = 1, height do
-		local depthToDig = depth - 1
-		if firstDig then
-			depthToDig = depth
-			firstDig = false
-		end
-		
-    	for depthTemp = 1, depthToDig do
-            print ("d ", depthTemp, "/", depth, " h ", heightTemp, "/", height)
-          	-- dig straight forward
-          	move.forward()
-        end
+   		move.forward(depth - 1)
+
           -- line complete, move to next line
         if heightTemp<height then
-          	move.up()
-            turtle.turnLeft()
-            turtle.turnLeft()
+          	move.up(1)
+            move.turnAround()
         end
    end
    
    -- slice complete, return to start
    -- move back on odd heights, otherwise we are already back
    if height % 2 == 1 then
-          turtle.turnLeft()
-          turtle.turnLeft()
-          for depthTemp=1, depth-1 do
-            move.forward()
-          end
+          move.turnAround()
+          move.forward(depth - 1)
    end
+
    -- move down
-   for heightTemp=1, height-1 do
-          turtle.down()
-   end
+   move.down(height - 1)
+
    -- next slice
    if widthTemp < width then
-          turtle.turnLeft()
-          move.forward()
-          turtle.turnLeft()
+          move.turnLeft()
+          move.forward(1)
+          move.turnLeft()
    end
 end
 
+move.returnHome()

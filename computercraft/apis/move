@@ -19,8 +19,20 @@ local zpos = 0
 -- should a movement always dig through any obstacles?
 local alwaysDig = false
 
+-- print debug messages?
+local doDebug = false
+
+-- seconds to wait between dig attempts
+local sleepTime = 0.2
+
 -- "Blocks collected" counter
 local collected = 0
+
+
+
+--
+-- Internals -------------------------------
+--
 
 local function collect()
 	collected = collected + 1
@@ -30,13 +42,9 @@ local function collect()
 end
 
 
---
--- Internals -------------------------------
---
-
 -- dig one block forward, possible multiple times if something
 -- has fallen down
-local function tryDig()
+local function tryDigForward()
 	while turtle.dig() do
 		collect()
 		sleep(sleepTime)
@@ -62,11 +70,72 @@ local function tryDigUp()
 	return not turtle.detectUp()
 end
 
+-- dig one block down, possible multiple times if something
+-- has, uh, moved into the spot
+local function tryDigDown()
+	while turtle.digDown() do
+		collect()
+		sleep(sleepTime)
+		if not turtle.detectDown() then
+			return true
+		end
+	end
+	
+	return not turtle.detectDown()
+end
+
+
+
+-- Move one block forward. Optionally removes anything in the way
+local function forward1()
+	if(alwaysDig) then
+		while not turtle.forward() do
+			tryDigForward()
+		end
+	else
+		turtle.forward()
+	end
+	
+	xpos = xpos + xdir
+	zpos = zpos + zdir
+	--sleep(sleepTime) -- uncomment for debugging
+end
+
+
+-- Move one block upward
+local function up1() 
+	if(alwaysDig) then
+		while not turtle.up() do
+			tryDigUp()
+		end
+	else
+		turtle.up()
+	end
+	
+	ypos = ypos + 1
+end
+
+-- Move one block down
+local function down1()
+	if(alwaysDig) then
+		while not turtle.down() do
+			tryDigDown()
+		end
+	else
+		turtle.down()
+	end
+	
+	ypos = ypos - 1
+end
+
+
 
 --
 -- API -------------------------
 --
 
+-- Set a flag that all movement operations should also 
+-- remove dig away in the way
 function enableDigging()
 	alwaysDig = true
 end
@@ -76,25 +145,99 @@ function disableDigging()
 end
 
 
--- Move one block forward. Optionally removes anything in the way
-function forward()
-	if(alwaysDig) then
-		while not turtle.forward() do
-			tryDig()
-		end
-	else
-		turtle.forward()
-	end
-	--sleep(sleepTime) -- uncomment for debugging
+function setDebugging(enable)
+	doDebug = enable
 end
 
--- dig and move one block upward. Retries as long as something is in the way
-function up() 
-	if(alwaysDig) then
-		while not turtle.up() do
-			tryDigUp()
-		end
-	else
-		turtle.up()
+-- Move <distance> blocks forward
+function forward(distance)
+	for i=1, distance do
+		forward1()
+		if(doDebug) then debug() end
 	end
+end
+
+-- Move <distance> blocks up
+function up(distance)
+	for i=1, distance do
+		up1()
+		if(doDebug) then debug() end
+	end
+end
+
+-- Move <distance> blocks down
+function down(distance)
+	for i=1, distance do
+		down1()
+		if(doDebug) then debug() end
+	end
+end
+
+function turnLeft()
+	turtle.turnLeft()
+	xdir, zdir = -zdir, xdir
+end
+
+function turnRight()
+	turtle.turnRight()
+	xdir, zdir = zdir, -xdir
+end
+
+-- Turn the turtle by 180 degrees
+function turnAround()
+	turnLeft()
+	turnLeft()
+end
+
+-- Turn the turtle to the given facing relative to the original
+-- (0,1) = original facing, (1,0) = right, (-1,0) = left, (0,-1) = back
+function turnTo(xDirection, zDirection)
+	local turns = 0
+	print("turnTo(", xDirection, ", ", zDirection, ") @ ", xdir, ", ", zdir)
+	while((xdir ~= xDirection) and (zdir ~= zDirection)) do
+		turnLeft()
+		turns = turns + 1
+		if(doDebug) then debug() end
+		
+		if(turns > 4) then
+			print("(", xDirection, ",", zDirection, ") isn't valid, you idiot!")
+			return
+		end
+	end
+end
+
+-- Move to the point of origin
+function returnHome()
+	if(ypos > 0) then
+		down(ypos)
+	else
+		up(ypos)
+	end
+
+	if(xpos > 0) then
+		print ("xpos > 0")
+		turnTo(-1, 0)
+		print ("turned, now move")
+		forward(xpos)
+	else
+		print ("xpos >= 0")
+		turnTo(1, 0)
+		forward(-xpos)
+	end
+	
+	if(zpos > 0) then
+		turnTo(0, -1)
+		forward(zpos)
+	else
+		turnTo(0, 1)
+		forward(-zpos)
+	end
+	
+	print ("turn to origin")
+
+	turnTo(0, 1)
+end
+
+function debug()
+	print("x=", xpos, " / y=" , ypos, " / z=", zpos, " / dir=", xdir, ",", zdir) 
 end
