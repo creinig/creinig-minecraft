@@ -1,0 +1,30 @@
+-- helper API for working with redstone
+-- include "ignored" lines
+
+local ignorePattern = 0; -- these colors may never be set
+
+-- API
+
+function registerIgnoreColor(color)
+	colors.combine(ignorePattern,color)
+end
+
+function unregisterIgnoreColor(color)
+	colors.subtract(ignorePattern,color)
+end
+
+function setColor(color, side, value)
+    local currentPattern = redstone.getBundledInput(side)
+	if(value) then
+		currentPattern = colors.combine(currentPattern, color)
+	else
+		currentPattern = colors.subtract(currentPattern, color)
+	end
+	currentPattern = colors.subtract(currentPattern, ignorPattern)
+	
+	redstone.setBundledOutput(side, currentPattern)
+end
+
+function clearAllColors(side)
+	redstone.setBundledOutput(side, 0)
+end
