@@ -13,6 +13,20 @@ function unregisterIgnoreColor(color)
 	colors.subtract(ignorePattern,color)
 end
 
+function waitForColor(color, side, value)
+	local wait = true
+	while wait do
+		event, p1, p2, p3, p4, p5 = os.pullEvent()
+		if event == "redstone" then
+			bcolors = redstone.getBundledInput(side)
+			wait = colors.test(bcolors, color)
+			if value then
+				wait = not wait
+			end
+		end
+	end
+end
+
 function setColor(color, side, value)
     local currentPattern = redstone.getBundledInput(side)
 	if(value) then
