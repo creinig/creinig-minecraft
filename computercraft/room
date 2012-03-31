@@ -3,7 +3,7 @@
 -- The room starts in the turtle's position and extends 
 -- forward, to the right and up
 --
--- Requires: apis/move
+-- Requires: apis/util, apis/move
 --
 -- TODO: empty the inventory if full
 --
@@ -19,6 +19,7 @@ height = tonumber(tArgs[2])
 width = tonumber(tArgs[3])
 
 
+os.loadAPI("apis/util")
 os.loadAPI("apis/move")
 move.enableDigging()
 move.setDebugging(true)

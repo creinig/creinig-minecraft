@@ -7,7 +7,7 @@
 function cloneTable(original)
 	local result = {}
 	
-	for (key, value in pairs(original)) do
+	for key, value in pairs(original) do
 		if(type(value) == "table") then
 			result[key] = cloneTable(value)
 		else
@@ -17,3 +17,4 @@ function cloneTable(original)
 	
 	return result
 end
+
