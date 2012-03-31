@@ -1,0 +1,19 @@
+--
+-- Collection of miscellaneous utility functions
+--
+
+
+-- Recursively clone the given table, creating an independent deep copy
+function cloneTable(original)
+	local result = {}
+	
+	for (key, value in pairs(original)) do
+		if(type(value) == "table") then
+			result[key] = cloneTable(value)
+		else
+			result[key] = value
+		end
+	end
+	
+	return result
+end
