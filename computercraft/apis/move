@@ -222,7 +222,7 @@ function to(destPosition, order)
 	local ydiff = pos.y - dest.y
 	local zdiff = pos.z - dest.z
 	
-	for local i=1, 3 do
+	for i=1, 3 do
 		local dir = string.sub(order, i, i)
 
 		if(dir == "x") then
@@ -239,7 +239,7 @@ function to(destPosition, order)
 			else
 				up(-ydiff)
 			end
-		elseif(dir == "z"
+		elseif(dir == "z") then
 			if(zdiff > 0) then
 				turnTo(0, -1)
 				forward(zdiff)
