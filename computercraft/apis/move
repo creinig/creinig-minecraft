@@ -2,6 +2,7 @@
 -- Little API to make moving and digging with the turtle a bit easier
 --
 
+os.loadAPI("apis/util")
 
 --
 -- State ----------------------
@@ -15,6 +16,15 @@ local zdir = 1
 local xpos = 0
 local ypos = 0
 local zpos = 0
+
+-- (const) The position of origin
+local homePosition = {
+	xpos = 0, ypos = 0, zpos = 0,
+	xdir = 0, zdir = 1
+	}
+	
+-- The current position
+local position = util.cloneTable(homePosition)
 
 -- should a movement always dig through any obstacles?
 local alwaysDig = false
@@ -96,8 +106,8 @@ local function forward1()
 		turtle.forward()
 	end
 	
-	xpos = xpos + xdir
-	zpos = zpos + zdir
+	position.xpos = position.xpos + position.xdir
+	position.zpos = position.zpos + position.zdir
 	--sleep(sleepTime) -- uncomment for debugging
 end
 
@@ -112,7 +122,7 @@ local function up1()
 		turtle.up()
 	end
 	
-	ypos = ypos + 1
+	position.ypos = position.ypos + 1
 end
 
 -- Move one block down
@@ -125,7 +135,7 @@ local function down1()
 		turtle.down()
 	end
 	
-	ypos = ypos - 1
+	position.ypos = position.ypos - 1
 end
 
 
@@ -175,12 +185,12 @@ end
 
 function turnLeft()
 	turtle.turnLeft()
-	xdir, zdir = -zdir, xdir
+	position.xdir, position.zdir = -position.zdir, position.xdir
 end
 
 function turnRight()
 	turtle.turnRight()
-	xdir, zdir = zdir, -xdir
+	position.xdir, position.zdir = position.zdir, -position.xdir
 end
 
 -- Turn the turtle by 180 degrees
@@ -193,7 +203,7 @@ end
 -- (0,1) = original facing, (1,0) = right, (-1,0) = left, (0,-1) = back
 function turnTo(xDirection, zDirection)
 	local turns = 0
-	while((xdir ~= xDirection) or (zdir ~= zDirection)) do
+	while((position.xdir ~= xDirection) or (position.zdir ~= zDirection)) do
 		turnLeft()
 		turns = turns + 1
 		if(doDebug) then debug() end
@@ -232,6 +242,12 @@ function returnHome()
 	turnTo(0, 1)
 end
 
+-- Get the current position
+function getPosition()
+	return util.cloneTable(position)
+end
+
 function debug()
-	print("x=", xpos, " / y=" , ypos, " / z=", zpos, " / dir=", xdir, ",", zdir) 
+	print("x=", position.xpos, " / y=" , position.ypos, " / z=", position.zpos, 
+	      " / dir=", position.xdir, ",", position.zdir) 
 end
