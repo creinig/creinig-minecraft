@@ -21,8 +21,18 @@ width = tonumber(tArgs[3])
 
 os.loadAPI("apis/util")
 os.loadAPI("apis/move")
+os.loadAPI("apis/inventory")
 move.enableDigging()
 move.setDebugging(true)
+
+
+
+local function dropStuff()
+	local pos = move.getPosition()
+	move.returnHome("yxz")
+	inventory.dropAll()
+	move.to(pos, "zxy")
+end
 
 
 -- create room
@@ -30,6 +40,10 @@ for widthTemp = 1, width do
    for heightTemp = 1, height do
    		move.forward(depth - 1)
 
+		if(inventory.isFullish()) then
+			dropStuff()
+		end
+		
         -- line complete, move to next line
         if heightTemp<height then
           	move.up(1)

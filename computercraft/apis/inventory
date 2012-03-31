@@ -14,3 +14,14 @@ function isFullish()
 	
 	return true
 end
+
+
+-- Drop all items in the inventory
+function dropAll()
+	for local i=1, 9 do
+		turtle.select(i)
+		turtle.drop()
+	end
+	
+	turtle.select(1)
+end
