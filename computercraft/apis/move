@@ -259,7 +259,7 @@ end
 
 -- Get the current position
 function getPosition()
-	return util.cloneTable(position)
+	return util.cloneTable(pos)
 end
 
 -- Define the current position as new point of origin

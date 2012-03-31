@@ -3,9 +3,10 @@
 -- The room starts in the turtle's position and extends 
 -- forward, to the right and up
 --
--- Requires: apis/util, apis/move
+-- If the turtle's inventory fills up it moves back to the origin,
+-- drops everything and then continues to work
 --
--- TODO: empty the inventory if full
+-- Requires: apis/util, apis/move, apis/inventory
 --
 
 local tArgs = { ... }

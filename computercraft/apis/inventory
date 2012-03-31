@@ -6,7 +6,7 @@
 -- Check if all inventory slots have something in them
 -- => items of a new type cannot be picked up
 function isFullish()
-	for local i=1, 9 do
+	for i=1, 9 do
 		if(turtle.getItemCount(i) == 0) then
 			return false
 		end
@@ -18,7 +18,7 @@ end
 
 -- Drop all items in the inventory
 function dropAll()
-	for local i=1, 9 do
+	for i=1, 9 do
 		turtle.select(i)
 		turtle.drop()
 	end
