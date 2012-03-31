@@ -1,0 +1,16 @@
+--
+-- Turtle inventory management
+--
+
+
+-- Check if all inventory slots have something in them
+-- => items of a new type cannot be picked up
+function isFullish()
+	for local i=1, 9 do
+		if(turtle.getItemCount(i) == 0) then
+			return false
+		end
+	end
+	
+	return true
+end
