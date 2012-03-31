@@ -207,35 +207,64 @@ function turnTo(xDirection, zDirection)
 end
 
 -- Move to the point of origin
-function returnHome()
-	if(pos.y > 0) then
-		down(pos.y)
-	else
-		up(-pos.y)
-	end
-
-	if(pos.x > 0) then
-		turnTo(-1, 0)
-		forward(pos.x)
-	else
-		turnTo(1, 0)
-		forward(-pos.x)
-	end
-	
-	if(pos.z > 0) then
-		turnTo(0, -1)
-		forward(pos.z)
-	else
-		turnTo(0, 1)
-		forward(-pos.z)
-	end
-	
-	turnTo(0, 1)
+function returnHome(order)
+	to(homePosition, order)
 end
+
+-- Move to the given position
+--
+-- "order" defines the order of the axis movement. 
+-- "zyx" would mean "first move to z=0, then y=0, then x=0"
+function to(destPosition, order)
+	order = order or "xyz"
+	local dest = destPosition
+	local xdiff = pos.x - dest.x
+	local ydiff = pos.y - dest.y
+	local zdiff = pos.z - dest.z
+	
+	for local i=1, 3 do
+		local dir = string.sub(order, i, i)
+
+		if(dir == "x") then
+			if(xdiff > 0) then
+				turnTo(-1, 0)
+				forward(xdiff)
+			else
+				turnTo(1, 0)
+				forward(-xdiff)
+			end
+		elseif(dir == "y") then
+			if(ydiff > 0) then
+				down(ydiff)
+			else
+				up(-ydiff)
+			end
+		elseif(dir == "z"
+			if(zdiff > 0) then
+				turnTo(0, -1)
+				forward(zdiff)
+			else
+				turnTo(0, 1)
+				forward(-zdiff)
+			end
+		else
+			print("Unknown axis '", dir, "'!")
+		end
+	end
+	
+		
+	turnTo(dest.xdir, dest.zdir)
+end
+
 
 -- Get the current position
 function getPosition()
 	return util.cloneTable(position)
+end
+
+-- Define the current position as new point of origin
+function reset()
+	pos = util.cloneTable(homePosition)
 end
 
 function debug()
