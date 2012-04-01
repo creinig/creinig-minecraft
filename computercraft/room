@@ -38,7 +38,7 @@ end
 
 -- create room
 for widthTemp = 1, width do
-   for heightTemp = 1, height do
+   	for heightTemp = 1, height do
    		move.forward(depth - 1)
 
 		if(inventory.isFullish()) then
@@ -50,24 +50,24 @@ for widthTemp = 1, width do
           	move.up(1)
             move.turnAround()
         end
-   end
+   	end
    
-   -- slice complete, return to start
-   -- move back on odd heights, otherwise we are already back
-   if height % 2 == 1 then
-          move.turnAround()
-          move.forward(depth - 1)
-   end
+   	-- slice complete, tackle next one
 
-   -- move down
-   move.down(height - 1)
-
-   -- next slice
-   if widthTemp < width then
-          move.turnLeft()
-          move.forward(1)
-          move.turnLeft()
-   end
+   	-- move down
+   	move.down(height - 1)
+	
+   	if widthTemp < width then
+		move.turnTo(1, 0)
+		move.forward(1)
+	
+		local pos = move.getPosition()
+	   	if(pos.z == 0) then
+			move.turnTo(0, 1)
+		else
+			move.turnTo(0, -1)
+	   	end
+	end
 end
 
-move.returnHome()
+move.returnHome("yxz")
