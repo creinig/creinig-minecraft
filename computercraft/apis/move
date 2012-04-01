@@ -150,11 +150,13 @@ function setDebugging(enable)
 	doDebug = enable
 end
 
--- Move <distance> blocks forward
-function forward(distance)
+-- Move <distance> blocks forward.
+-- If placeFloor is set, each step also triggers a placeDown()
+function forward(distance, placeFloor)
 	for i=1, distance do
 		forward1()
 		if(doDebug) then debug() end
+		if(placeFloor) then turtle.placeDown() end
 	end
 end
 

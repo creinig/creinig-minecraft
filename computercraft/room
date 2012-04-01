@@ -11,13 +11,14 @@
 
 local tArgs = { ... }
 -- check number of arguments
-if #tArgs < 3 then
-    error("Usage: room <depth> <height> <width>")
+if #tArgs < 3 or #tArgs > 4 then
+    error("Usage: room <depth> <height> <width> [placeFloor]")
 end
 
 depth = tonumber(tArgs[1])
 height = tonumber(tArgs[2])
 width = tonumber(tArgs[3])
+placeFloor = tArgs[4]
 
 
 os.loadAPI("apis/util")
@@ -39,7 +40,7 @@ end
 -- create room
 for widthTemp = 1, width do
    	for heightTemp = 1, height do
-   		move.forward(depth - 1)
+   		move.forward(depth - 1, (heightTemp == 1 and placeFloor))
 
 		if(inventory.isFullish()) then
 			dropStuff()
@@ -59,7 +60,7 @@ for widthTemp = 1, width do
 	
    	if widthTemp < width then
 		move.turnTo(1, 0)
-		move.forward(1)
+		move.forward(1, placeFloor)
 	
 		local pos = move.getPosition()
 	   	if(pos.z == 0) then
