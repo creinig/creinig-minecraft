@@ -1,19 +1,91 @@
 -- helper API for working with redstone
 -- include "ignored" lines
 
-local ignorePattern = 0; -- these colors may never be set
+local ignorePattern = 0 -- these colors may never be set
 
--- API
+local inputSide = 'left'
+local outputSide = 'right'
+
+local pulsers = {}
+
+local doDebug = false
+
+--
+-- API -----------------------------------
+--
+
+-- Set the sides to use for input/output by default
+function setDefaultSides(input, output)
+	inputSide = input
+	outputSide = output
+end
+
+-- enable/disable debugging output
+function setDebug(debugFlag)
+	doDebug = debugFlag
+end
 
 function registerIgnoreColor(color)
-	colors.combine(ignorePattern,color)
+	colors.combine(ignorePattern, color)
 end
 
 function unregisterIgnoreColor(color)
-	colors.subtract(ignorePattern,color)
+	colors.subtract(ignorePattern, color)
 end
 
-function waitForColor(color, side, value)
+-- Register a pulser to be handled by pulserTick().
+-- The pulser will pulse <color> with <interval> seconds between pulses 
+-- <duration> seconds in length, up to a maximum of <maxcount> pulses
+-- (<maxcount> == 0 means forever)
+function registerPulser(name, color, interval, duration, count)
+	local pulser = {color, interval or 1, duration or 0.1, maxcount or 0}
+
+	pulser.age = pulser.interval -- start with pulse
+	pulser.state = false
+	pulser.count = 0
+
+	pulsers[name] = pulser
+end
+
+function unregisterPulser(name)
+	table[name] = nil
+end
+
+-- Process one "pulser tick", i.e. treat all pulsers as if
+-- <timeSinceLastTick> seconds have passed (default: 0.1).
+-- This is intended to be called from a "while .. sleep .. end" loop
+-- that typically also handles other logic.
+function pulserTick(timeSinceLastTick)
+	local delay = timeSinceLastTick or 0.1
+
+	for name, spec in pairs(pulsers) do
+		def.spec = spec.age + delay
+	
+		local maxAge
+		if(spec.state == true) then
+			maxAge = spec.duration
+		else
+			maxAge = spec.interval
+		end
+	
+		if(spec.age >= maxAge) then
+  			spec.count = spec.count + 1
+  			spec.state = not spec.state
+  			doDebug and print ("Setting " , name , " to " , spec.state, " (#", spec.count, ")")
+  			setColor(spec.color, spec.state)
+  			spec.age = 0
+  			
+  			if((spec.maxCount > 0) and (spec.count >= spec.maxCount)) then
+  				unregisterPulser(name)
+  			end
+  		end
+	end
+end
+
+
+function waitForColor(color, value, side)
+	side = side or inputSide
+	
 	local wait = true
 	while wait do
 		event, p1, p2, p3, p4, p5 = os.pullEvent()
@@ -27,18 +99,21 @@ function waitForColor(color, side, value)
 	end
 end
 
-function setColor(color, side, value)
+function setColor(color, value, side)
+	side = side or outputSide
+	
     local currentPattern = redstone.getBundledInput(side)
 	if(value) then
 		currentPattern = colors.combine(currentPattern, color)
 	else
 		currentPattern = colors.subtract(currentPattern, color)
 	end
-	currentPattern = colors.subtract(currentPattern, ignorPattern)
+	currentPattern = colors.subtract(currentPattern, ignorePattern)
 	
 	redstone.setBundledOutput(side, currentPattern)
 end
 
 function clearAllColors(side)
+	side = side or outputSide
 	redstone.setBundledOutput(side, 0)
 end
