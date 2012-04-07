@@ -39,19 +39,19 @@ end
 -- The pulser will pulse <color> with <interval> seconds between pulses 
 -- <duration> seconds in length, up to a maximum of <maxcount> pulses
 -- (<maxcount> == 0 means forever)
-function registerPulser(name, color, interval, duration, count)
-	local pulser = {color, interval or 1, duration or 0.1, maxcount or 0}
+function registerPulser(name, color, interval, duration, maxcount)
+	local pulser = {color = color, interval = interval or 1, duration = duration or 0.1, maxcount = maxcount or 0}
 
 	pulser.age = pulser.interval -- start with pulse
 	pulser.state = false
 	pulser.count = 0
 
-		print("reg: ", name, ": ", pulser.color, ", ", pulser.interval, ", ", pulser.duration, ", ", pulser.maxCount, ", ", pulser.age, ", ", pulser.count) 
+	print("Reg: ", name, ": ", pulser.color, ", ", pulser.interval, ", ", pulser.duration, ", ", pulser.maxCount, ", ", pulser.age, ", ", pulser.count) 
 	pulsers[name] = pulser
 end
 
 function unregisterPulser(name)
-	table[name] = nil
+	pulsers[name] = nil
 end
 
 -- Process one "pulser tick", i.e. treat all pulsers as if
@@ -60,9 +60,9 @@ end
 -- that typically also handles other logic.
 function pulserTick(timeSinceLastTick)
 	local delay = timeSinceLastTick or 0.1
+	local pulsersToRemove = {}
 
 	for name, spec in pairs(pulsers) do
-		print(name, ": ", spec.color, ", ", spec.interval, ", ", spec.duration, ", ", spec.maxCount, ", ", spec.age, ", ", spec.count) 
 		spec.age = spec.age + delay
 	
 		local maxAge
@@ -73,8 +73,12 @@ function pulserTick(timeSinceLastTick)
 		end
 	
 		if(spec.age >= maxAge) then
-  			spec.count = spec.count + 1
   			spec.state = not spec.state
+  			
+  			if(spec.state) then
+  				-- count when switching the signal on
+	  			spec.count = spec.count + 1
+  			end
   			
   			if(doDebug) then
   				print ("Setting " , name , " to " , spec.state, " (#", spec.count, ")")
@@ -83,10 +87,15 @@ function pulserTick(timeSinceLastTick)
   			setColor(spec.color, spec.state)
   			spec.age = 0
   			
-  			if((spec.maxCount > 0) and (spec.count >= spec.maxCount)) then
-  				unregisterPulser(name)
+  			-- If the signal is off again and has exceeded its maxcount, remove the pulser
+  			if((not spec.state) and (spec.maxcount > 0) and (spec.count >= spec.maxcount)) then
+  				pulsersToRemove[#pulsersToRemove + 1] = name
   			end
   		end
+	end
+	
+	for i, name in pairs(pulsersToRemove) do
+		unregisterPulser(name)
 	end
 end
 

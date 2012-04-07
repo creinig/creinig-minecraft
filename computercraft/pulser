@@ -14,8 +14,6 @@ rsh.setDefaultSides('left', 'back')
 rsh.registerPulser("recycler", colors.green, 45)
 rsh.registerPulser("piping", colors.yellow, 10)
 
-rsh.registerPulser("eter", colors.red, 0.5, 1)
-rsh.registerPulser("lim", colors.black, 0.5, 1, 15)
 
 --
 -- Main loop
