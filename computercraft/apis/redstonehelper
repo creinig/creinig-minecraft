@@ -1,6 +1,8 @@
 -- helper API for working with redstone
 -- include "ignored" lines
 
+-- FIXME: decouple setColor() from the input bus (remember a currentPattern, and optionally merge it with the input)
+
 local ignorePattern = 0 -- these colors may never be set
 
 local inputSide = 'left'
@@ -21,7 +23,7 @@ function setDefaultSides(input, output)
 end
 
 -- enable/disable debugging output
-function setDebug(debugFlag)
+function setDebugging(debugFlag)
 	doDebug = debugFlag
 end
 
@@ -44,6 +46,7 @@ function registerPulser(name, color, interval, duration, count)
 	pulser.state = false
 	pulser.count = 0
 
+		print("reg: ", name, ": ", pulser.color, ", ", pulser.interval, ", ", pulser.duration, ", ", pulser.maxCount, ", ", pulser.age, ", ", pulser.count) 
 	pulsers[name] = pulser
 end
 
@@ -59,7 +62,8 @@ function pulserTick(timeSinceLastTick)
 	local delay = timeSinceLastTick or 0.1
 
 	for name, spec in pairs(pulsers) do
-		def.spec = spec.age + delay
+		print(name, ": ", spec.color, ", ", spec.interval, ", ", spec.duration, ", ", spec.maxCount, ", ", spec.age, ", ", spec.count) 
+		spec.age = spec.age + delay
 	
 		local maxAge
 		if(spec.state == true) then
@@ -71,7 +75,11 @@ function pulserTick(timeSinceLastTick)
 		if(spec.age >= maxAge) then
   			spec.count = spec.count + 1
   			spec.state = not spec.state
-  			doDebug and print ("Setting " , name , " to " , spec.state, " (#", spec.count, ")")
+  			
+  			if(doDebug) then
+  				print ("Setting " , name , " to " , spec.state, " (#", spec.count, ")")
+  			end
+  			
   			setColor(spec.color, spec.state)
   			spec.age = 0
   			
